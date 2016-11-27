@@ -80,6 +80,7 @@ class APIEventStream(HomeAssistantView):
         # pylint: disable=no-self-use
         hass = request.app['hass']
         stop_obj = object()
+        ping_obj = object()
         to_write = asyncio.Queue(loop=hass.loop)
 
         restrict = request.GET.get('restrict')
@@ -104,8 +105,20 @@ class APIEventStream(HomeAssistantView):
 
             yield from to_write.put(data)
 
-        response = web.StreamResponse()
-        response.content_type = 'text/event-stream'
+
+        response = None
+
+        ws_response = web.WebSocketResponse()
+
+        sse_response = web.StreamResponse()
+        sse_response.content_type = 'text/event-stream'
+
+        if ws_response.can_prepare(request):
+            response = ws_response
+        else:
+            response = sse_response
+            
+        
         yield from response.prepare(request)
 
         unsub_stream = hass.bus.async_listen(MATCH_ALL, forward_events)
@@ -114,7 +127,7 @@ class APIEventStream(HomeAssistantView):
             _LOGGER.debug('STREAM %s ATTACHED', id(stop_obj))
 
             # Fire off one message so browsers fire open event right away
-            yield from to_write.put(STREAM_PING_PAYLOAD)
+            yield from to_write.put(ping_obj)
 
             while True:
                 try:
@@ -125,13 +138,24 @@ class APIEventStream(HomeAssistantView):
                     if payload is stop_obj:
                         break
 
-                    msg = "data: {}\n\n".format(payload)
-                    _LOGGER.debug('STREAM %s WRITING %s', id(stop_obj),
-                                  msg.strip())
-                    response.write(msg.encode("UTF-8"))
+                    if response is ws_response:
+                        if payload is ping_obj:
+                            response.ping(STREAM_PING_PAYLOAD)
+                        else:
+                            response.send_str(payload)
+                            _LOGGER.debug('STREAM %s WRITING %s', id(stop_obj),
+                                          payload)
+                    else:
+                        if payload is ping_obj:
+                            payload = STREAM_PING_PAYLOAD
+                        msg = "data: {}\n\n".format(payload)
+                        _LOGGER.debug('STREAM %s WRITING %s', id(stop_obj),
+                                      msg.strip())
+                        response.write(msg.encode("UTF-8"))
+
                     yield from response.drain()
                 except asyncio.TimeoutError:
-                    yield from to_write.put(STREAM_PING_PAYLOAD)
+                    yield from to_write.put(ping_obj)
 
         finally:
             _LOGGER.debug('STREAM %s RESPONSE CLOSED', id(stop_obj))
