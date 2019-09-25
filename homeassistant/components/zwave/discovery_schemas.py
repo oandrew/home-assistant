@@ -53,19 +53,29 @@ DISCOVERY_SCHEMAS = [
             const.GENERIC_TYPE_THERMOSTAT,
             const.GENERIC_TYPE_SENSOR_MULTILEVEL,
         ],
+        const.DISC_SPECIFIC_DEVICE_CLASS: [
+            const.SPECIFIC_TYPE_THERMOSTAT_GENERAL_V2,
+        ],
         const.DISC_VALUES: dict(
             DEFAULT_VALUES_SCHEMA,
             **{
                 const.DISC_PRIMARY: {
-                    const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_SETPOINT]
+                    const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_MODE],
+                },
+                # "mode": {
+                #     const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_MODE],
+                # },
+                "setpoint_heating": {
+                    const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_SETPOINT],
+                    const.DISC_INDEX: [1],
+                },
+                "setpoint_cooling": {
+                    const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_SETPOINT],
+                    const.DISC_INDEX: [2],
                 },
                 "temperature": {
                     const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_SENSOR_MULTILEVEL],
                     const.DISC_INDEX: [const.INDEX_SENSOR_MULTILEVEL_TEMPERATURE],
-                    const.DISC_OPTIONAL: True,
-                },
-                "mode": {
-                    const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_MODE],
                     const.DISC_OPTIONAL: True,
                 },
                 "fan_mode": {
@@ -92,6 +102,51 @@ DISCOVERY_SCHEMAS = [
             },
         ),
     },
+    # {
+    #     const.DISC_COMPONENT: "climate",
+    #     const.DISC_GENERIC_DEVICE_CLASS: [
+    #         const.GENERIC_TYPE_THERMOSTAT,
+    #         const.GENERIC_TYPE_SENSOR_MULTILEVEL,
+    #     ],
+    #     const.DISC_VALUES: dict(
+    #         DEFAULT_VALUES_SCHEMA,
+    #         **{
+    #             const.DISC_PRIMARY: {
+    #                 const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_SETPOINT]
+    #             },
+    #             "temperature": {
+    #                 const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_SENSOR_MULTILEVEL],
+    #                 const.DISC_INDEX: [const.INDEX_SENSOR_MULTILEVEL_TEMPERATURE],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #             "mode": {
+    #                 const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_MODE],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #             "fan_mode": {
+    #                 const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_THERMOSTAT_FAN_MODE],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #             "operating_state": {
+    #                 const.DISC_COMMAND_CLASS: [
+    #                     const.COMMAND_CLASS_THERMOSTAT_OPERATING_STATE
+    #                 ],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #             "fan_action": {
+    #                 const.DISC_COMMAND_CLASS: [
+    #                     const.COMMAND_CLASS_THERMOSTAT_FAN_ACTION
+    #                 ],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #             "zxt_120_swing_mode": {
+    #                 const.DISC_COMMAND_CLASS: [const.COMMAND_CLASS_CONFIGURATION],
+    #                 const.DISC_INDEX: [33],
+    #                 const.DISC_OPTIONAL: True,
+    #             },
+    #         },
+    #     ),
+    # },
     {
         const.DISC_COMPONENT: "cover",  # Rollershutter
         const.DISC_GENERIC_DEVICE_CLASS: [
